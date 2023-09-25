@@ -7,6 +7,10 @@ import pyjokes
 import os
 import sys
 import wikipedia
+import requests
+from geopy.geocoders import Nominatim
+
+
 
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
@@ -48,8 +52,79 @@ def wishMe():
 
     else:
         speak("Good Evening!")
+    
+    speak("I am Jarvis 2 point o , Please tell me how may I help you")
 
-    speak("I am Jarvis 2 point o , Sir. Please tell me how may I help you")
+
+def get_weather_info(city_name):
+    try:
+        # Use geolocation to get coordinates for the city
+        geolocator = Nominatim(user_agent="geoapiExercies")
+        location = geolocator.geocode(city_name)
+        
+        if location:
+            latitude = location.latitude
+            longitude = location.longitude
+            api_url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid=YOUR_WEATHER_API"
+            
+            response = requests.get(api_url)
+            weather_data = response.json()
+            
+            if weather_data.get('cod') == 200:
+                weather_description = weather_data['weather'][0]['description']
+                temperature = int(weather_data['main']['temp']-273.15)
+                humidity = weather_data['main']['humidity']
+                wind_speed = weather_data['wind']['speed']
+                
+                # Format and speak the weather information
+                speak(f"In {city_name}, the weather is {weather_description}.")
+                speak(f"The temperature is {temperature} degrees Celsius.")
+                speak(f"Humidity is {humidity}% and wind speed is {wind_speed} meters per second.")
+            else:
+                speak("Sorry, I couldn't fetch the weather information for that city.")
+        else:
+            speak(f"Sorry, I couldn't find the coordinates for {city_name}.")
+    except Exception as e:
+        speak(f"An error occurred: {e}")
+
+news_api_key = 'YOUR_NEWS_API'
+
+def get_news(limit=3):
+    try:
+        api_url = f"https://newsapi.org/v2/top-headlines?country=us&apiKey={news_api_key}"
+        response = requests.get(api_url)
+
+        if response.status_code == 200:
+            news_data = response.json()
+
+            if 'articles' in news_data:
+                articles = news_data['articles']
+                if articles:
+                    speak("Here are the latest news headlines:")
+                    for article in articles:
+                        title = article.get('title', 'No title available')
+                        speak(title)
+                else:
+                    speak("Sorry, I couldn't find any news headlines at the moment.")
+            else:
+                speak("Sorry, I couldn't fetch news headlines at the moment.")
+        else:
+            speak(f"Failed to fetch news. HTTP Status Code: {response.status_code}")
+
+    except Exception as e:
+        speak(f"An error occurred: {e}")
+
+def respond_to_joke(query):
+    joke = pyjokes.get_joke()
+    speak(joke)
+    print(joke)
+    while True:
+        response = takeCommand()
+        if 'ha ha' in response:
+            speak("I'm glad you found it funny!")
+        else:
+            speak("I'm here to tell jokes. If you have any other requests, feel free to ask.")
+        break
 
 
 if __name__ == '__main__':
@@ -73,9 +148,8 @@ if __name__ == '__main__':
             pywhatkit.playonyt(song)
 
         elif 'what is' in query or 'who is' in query:
-            speak('Searching...')
             try:
-                results = wikipedia.summary(query, sentences=1)
+                results = wikipedia.summary(query, sentences=2)
                 speak("According to Wikipedia")
                 print(results)
                 speak(results)
@@ -100,23 +174,30 @@ if __name__ == '__main__':
             speak('I am in a relationship with wifi')
 
         elif 'who are you' in query:
-            speak('I am Jarvis , a virtual assistant created by beebake')
+            speak('I am Jarvis , a virtual assistant created by beebake car key')
+
+        elif 'i love you' in query:
+            speak('Hiye may... mar. jawa!!')
 
         elif 'joke' in query:
-            joke = pyjokes.get_joke()
-            speak(joke)
-            print(joke)
-            
+            respond_to_joke(query)
+
         elif 'calculate' in query:
             expression = query.replace('calculate', '').strip()
-            expression = expression.replace('x', '*').replace('times', '*')  # Convert 'x' or 'times' to '*'
+            expression = expression.replace('x', '*').replace('times', '*') 
             try:
                 result = eval(expression)
                 speak(f"The result of {expression} is {result}")
             except Exception as e:
                 speak("Sorry, I couldn't calculate that.")
 
-            
+        if 'weather' in query:
+            city_name = query.replace('weather', '').strip()
+            get_weather_info(city_name)
+
+        elif 'news' in query:
+            get_news(limit=3)
+
         elif 'jarvis stop' in query or 'exit jarvis' in query:
             speak("Thank you for using Jarvis! Have a great day! Goodbye!")
             sys.exit()
