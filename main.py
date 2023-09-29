@@ -65,7 +65,7 @@ def get_weather_info(city_name):
         if location:
             latitude = location.latitude
             longitude = location.longitude
-            api_url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid=YOUR_WEATHER_API"
+            api_url = f"https://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid=1928ae6351f01c8101d0d28c6602e2e4"
             
             response = requests.get(api_url)
             weather_data = response.json()
@@ -87,7 +87,7 @@ def get_weather_info(city_name):
     except Exception as e:
         speak(f"An error occurred: {e}")
 
-news_api_key = 'YOUR_NEWS_API'
+news_api_key = '71471099c5de4b3a8deeec41f9221492'
 
 def get_news(limit=3):
     try:
@@ -172,6 +172,9 @@ if __name__ == '__main__':
 
         elif 'are you single' in query:
             speak('I am in a relationship with wifi')
+
+        elif 'what can you do' in query:
+            speak('I can play your favourite song on youtube , tell the weather of any city you want to know , read top news headlines , can answer anything from wikipedia , tell some funny jokes and many more ')
 
         elif 'who are you' in query:
             speak('I am Jarvis , a virtual assistant created by beebake car key')
