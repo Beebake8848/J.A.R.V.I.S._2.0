@@ -147,7 +147,7 @@ if __name__ == '__main__':
             speak('playing ' + song)
             pywhatkit.playonyt(song)
 
-        elif 'what is' in query or 'who is' in query:
+        elif 'wikipedia' in query or 'who is' in query:
             try:
                 results = wikipedia.summary(query, sentences=2)
                 speak("According to Wikipedia")
